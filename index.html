@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Shared Allowance Fund Tracker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+        
+        .summary-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        
+        .summary-item {
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .summary-label {
+            font-size: 0.85em;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+        
+        .summary-value {
+            font-size: 1.6em;
+            font-weight: bold;
+        }
+        
+        .individual-balances {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .person-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+        }
+        
+        .person-card.person1 {
+            border-left-color: #27ae60;
+        }
+        
+        .person-card.person2 {
+            border-left-color: #e74c3c;
+        }
+        
+        .person-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .person-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        
+        .person-stat {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .person-stat-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 3px;
+        }
+        
+        .person-stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+        
+        td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            font-size: 0.85em;
+            vertical-align: top;
+        }
+        
+        .week-header {
+            background-color: #f8f9fa !important;
+            font-weight: bold;
+            border-top: 2px solid #3498db;
+        }
+        
+        .purchase-row {
+            background-color: #fefefe;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.85em;
+            text-align: center;
+        }
+        
+        .input-field.small {
+            max-width: 80px;
+        }
+        
+        .person1-color { background-color: #d5f4e6; }
+        .person2-color { background-color: #fadbd8; }
+        
+        .positive-balance {
+            background-color: #27ae60 !important;
+            color: white !important;
+            font-weight: bold;
+        }
+        
+        .negative-balance {
+            background-color: #e74c3c !important;
+            color: white !important;
+            font-weight: bold;
+        }
+        
+        .status-available {
+            background-color: #27ae60;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+        
+        .status-deficit {
+            background-color: #e74c3c;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+        
+        .currency {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        .add-row-btn, .add-purchase-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        
+        .add-row-btn {
+            padding: 12px 24px;
+            font-size: 1em;
+            margin-top: 20px;
+        }
+        
+        .add-row-btn:hover, .add-purchase-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        
+        .remove-btn:hover {
+            background: #c0392b;
+        }
+        
+        .instructions {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .instructions h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        
+        .withdrawal-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin: 2px;
+        }
+        
+        .withdrawn {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .not-withdrawn {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .shareable-url-container {
+            margin-top: 10px;
+        }
+        
+        .shareable-url {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.85em;
+            background: #f8f9fa;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .summary-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .individual-balances {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 0.75em;
+            }
+            
+            th, td {
+                padding: 6px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 Enhanced Shared Allowance Fund Tracker</h1>
+        
+        <div class="name-setup" style="text-align: center; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+            <div style="margin-bottom: 10px;">
+                <label style="margin-right: 10px; font-weight: bold;">Person 1:</label>
+                <input type="text" id="person1Name" placeholder="Enter name" style="padding: 5px; border: 1px solid #ddd; border-radius: 4px; margin-right: 20px;" onchange="updatePersonNames()">
+                <label style="margin-right: 10px; font-weight: bold;">Person 2:</label>
+                <input type="text" id="person2Name" placeholder="Enter name" style="padding: 5px; border: 1px solid #ddd; border-radius: 4px;" onchange="updatePersonNames()">
+            </div>
+            <p><strong>$100 per person × 2 people = $200 total weekly allowance</strong></p>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 How to Use:</h3>
+            <p><strong>Setup:</strong> Enter both person's names above</p>
+            <p><strong>Multiple Purchases:</strong> Add multiple purchase rows per week using the "+" button</p>
+            <p><strong>Individual Tracking:</strong> Each purchase is tracked per person - select who made each purchase</p>
+            <p><strong>Weekly Withdrawal:</strong> Check the $200 withdrawal box when you physically withdraw the money</p>
+            <p><strong>Individual Withdrawals:</strong> Track if each person has withdrawn their individual $100</p>
+            <p><strong>Visual Cues:</strong> Green = Funds Available | Red = Deficit | Individual balances shown below</p>
+            <p><strong>Sharing:</strong> Bookmark this page or copy the URL below - changes save automatically!</p>
+            <div class="shareable-url-container">
+                <p><strong>Shareable URL:</strong></p>
+                <input type="text" id="shareableUrl" class="shareable-url" readonly value="Make changes to generate a shareable URL">
+                <p><small><strong>Note:</strong> Copy this URL to share your data. If running in a restricted environment (e.g., iframe), you may need to save this HTML file locally and open it directly in a browser to enable URL sharing.</small></p>
+            </div>
+        </div>
+        
+        <div class="summary-section">
+            <div class="summary-item">
+                <div class="summary-label">Total Available Balance</div>
+                <div class="summary-value currency" id="currentBalance">$0.00</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Total Spent (YTD)</div>
+                <div class="summary-value currency" id="totalSpent">$0.00</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Total Allowance (YTD)</div>
+                <div class="summary-value currency" id="totalAllowance">$0.00</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Weekly Cash Withdrawal</div>
+                <div class="summary-value" id="weeklyWithdrawalStatus">Not Withdrawn</div>
+                <div style="font-size: 0.8em; margin-top: 5px; opacity: 0.8;">$200 physical cash</div>
+            </div>
+        </div>
+        
+        <div class="individual-balances">
+            <div class="person-card person1">
+                <div class="person-name" id="person1CardName">Person 1</div>
+                <div class="person-stats">
+                    <div class="person-stat">
+                        <div class="person-stat-label">Available Balance</div>
+                        <div class="person-stat-value currency" id="person1Balance">$0.00</div>
+                    </div>
+                    <div class="person-stat">
+                        <div class="person-stat-label">Total Spent</div>
+                        <div class="person-stat-value currency" id="person1Spent">$0.00</div>
+                    </div>
+                    <div class="person-stat">
+                        <div class="person-stat-label">Individual Withdrawal</div>
+                        <div class="person-stat-value" id="person1Withdrawal">Not Withdrawn</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="person-card person2">
+                <div class="person-name" id="person2CardName">Person 2</div>
+                <div class="person-stats">
+                    <div class="person-stat">
+                        <div class="person-stat-label">Available Balance</div>
+                        <div class="person-stat-value currency" id="person2Balance">$0.00</div>
+                    </div>
+                    <div class="person-stat">
+                        <div class="person-stat-label">Total Spent</div>
+                        <div class="person-stat-value currency" id="person2Spent">$0.00</div>
+                    </div>
+                    <div class="person-stat">
+                        <div class="person-stat-label">Individual Withdrawal</div>
+                        <div class="person-stat-value" id="person2Withdrawal">Not Withdrawn</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table id="trackerTable">
+                <thead>
+                    <tr>
+                        <th>Week Start Date</th>
+                        <th>Opening Balance</th>
+                        <th>Weekly Allowance</th>
+                        <th>$200 Weekly Withdrawal</th>
+                        <th>Individual Withdrawals</th>
+                        <th>Purchase Description</th>
+                        <th>Who Purchased</th>
+                        <th>Purchase Cost</th>
+                        <th id="person1BalanceHeader">Person 1 Balance</th>
+                        <th id="person2BalanceHeader">Person 2 Balance</th>
+                        <th>Purchaser Balance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+        
+        <button class="add-row-btn" onclick="addWeek()">➕ Add New Week</button>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #e8f4fd; border-radius: 8px; border-left: 4px solid #3498db;">
+            <h4 style="margin-top: 0; color: #2c3e50;">📱 Sharing Instructions:</h4>
+            <p><strong>To share with your partner:</strong></p>
+            <ol style="margin-bottom: 10px;">
+                <li>Make any purchase entry or change</li>
+                <li>Copy the URL from the "Shareable URL" field above or your browser's address bar</li>
+                <li>Share that URL - it contains all your data!</li>
+                <li>Both of you can bookmark the URL for quick access</li>
+            </ol>
+            <p><small><strong>Note:</strong> The URL automatically updates with your data each time you make changes. If the URL doesn't update (e.g., in an iframe), copy the "Shareable URL" field or save this HTML file locally and open it in a browser.</small></p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize data structure
+        let weeks = [];
+        let startDate = new Date('2025-06-09'); // Monday, June 9, 2025
+        let personNames = { person1: '', person2: '' };
+        
+        // Initialize with first week, all balances zero
+        function initializeTracker() {
+            weeks = [{
+                date: new Date(startDate),
+                person1OpeningBalance: 0,
+                person2OpeningBalance: 0,
+                weeklyAllowance: 200,
+                weeklyWithdrawalMade: false,
+                person1Withdrawn: false,
+                person2Withdrawn: false,
+                purchases: [{
+                    description: '',
+                    purchasedBy: '',
+                    cost: 0,
+                    person1BalanceAfter: 0,
+                    person2BalanceAfter: 0
+                }],
+                person1Balance: 0,
+                person2Balance: 0,
+                status: 'No Funds'
+            }];
+            
+            calculateBalances();
+            renderTable();
+            updateSummary();
+            saveData();
+        }
+        
+        function calculateBalances() {
+            let runningPerson1Balance = 0;
+            let runningPerson2Balance = 0;
+            
+            try {
+                for (let i = 0; i < weeks.length; i++) {
+                    if (i === 0) {
+                        weeks[i].person1OpeningBalance = 0;
+                        weeks[i].person2OpeningBalance = 0;
+                        runningPerson1Balance = 0;
+                        runningPerson2Balance = 0;
+                    } else {
+                        weeks[i].person1OpeningBalance = weeks[i-1].person1Balance;
+                        weeks[i].person2OpeningBalance = weeks[i-1].person2Balance;
+                        runningPerson1Balance = weeks[i-1].person1Balance;
+                        runningPerson2Balance = weeks[i-1].person2Balance;
+                    }
+                    
+                    // Add weekly allowance (split evenly)
+                    runningPerson1Balance += 100;
+                    runningPerson2Balance += 100;
+                    
+                    // Process each purchase and store balance after each
+                    weeks[i].purchases.forEach(purchase => {
+                        if (purchase.purchasedBy === 'person1') {
+                            runningPerson1Balance -= purchase.cost;
+                        } else if (purchase.purchasedBy === 'person2') {
+                            runningPerson2Balance -= purchase.cost;
+                        } else if (purchase.purchasedBy === 'shared' && purchase.cost > 0) {
+                            const splitCost = purchase.cost / 2;
+                            runningPerson1Balance -= splitCost;
+                            runningPerson2Balance -= splitCost;
+                        }
+                        purchase.person1BalanceAfter = runningPerson1Balance;
+                        purchase.person2BalanceAfter = runningPerson2Balance;
+                    });
+                    
+                    weeks[i].person1Balance = runningPerson1Balance;
+                    weeks[i].person2Balance = runningPerson2Balance;
+                    weeks[i].status = (runningPerson1Balance + runningPerson2Balance) > 0 ? 'Funds Available' : (runningPerson1Balance + runningPerson2Balance) < 0 ? 'Deficit - Paying Back' : 'No Funds';
+                }
+            } catch (e) {
+                console.error('Error in calculateBalances:', e);
+            }
+        }
+        
+        function formatDate(date) {
+            return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+        
+        function formatCurrency(amount) {
+            return '$' + amount.toFixed(2);
+        }
+        
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            if (!tbody) {
+                console.error('Table body element not found');
+                return;
+            }
+            tbody.innerHTML = '';
+            
+            // Update table headers with person names
+            const person1Header = document.getElementById('person1BalanceHeader');
+            const person2Header = document.getElementById('person2BalanceHeader');
+            if (person1Header) person1Header.textContent = personNames.person1 || 'Person 1 Balance';
+            if (person2Header) person2Header.textContent = personNames.person2 || 'Person 2 Balance';
+            
+            try {
+                weeks.forEach((week, weekIndex) => {
+                    // Show first week, weeks with activity, or the latest week
+                    const hasActivity = week.purchases.some(p => p.description || p.cost > 0) || 
+                                      week.person1Withdrawn || week.person2Withdrawn || 
+                                      week.weeklyWithdrawalMade;
+                    const isLatestWeek = weekIndex === weeks.length - 1;
+                    
+                    if (!hasActivity && weekIndex > 0 && !isLatestWeek) return;
+                    
+                    // Apply conditional formatting to balances
+                    let person1BalanceClass = week.person1Balance > 0 ? 'positive-balance' : 'negative-balance';
+                    let person2BalanceClass = week.person2Balance > 0 ? 'positive-balance' : 'negative-balance';
+                    
+                    // Create withdrawal checkboxes
+                    const person1Label = personNames.person1 || 'Person 1';
+                    const person2Label = personNames.person2 || 'Person 2';
+                    
+                    const individualWithdrawalsCell = `
+                        <div style="text-align: left; font-size: 0.8em;">
+                            <label style="display: block; margin-bottom: 3px;">
+                                <input type="checkbox" ${week.person1Withdrawn ? 'checked' : ''} 
+                                    onchange="updateIndividualWithdrawal(${weekIndex}, 'person1', this.checked)" style="margin-right: 3px;">
+                                ${person1Label} ($100)
+                            </label>
+                            <label style="display: block;">
+                                <input type="checkbox" ${week.person2Withdrawn ? 'checked' : ''} 
+                                    onchange="updateIndividualWithdrawal(${weekIndex}, 'person2', this.checked)" style="margin-right: 3px;">
+                                ${person2Label} ($100)
+                            </label>
+                        </div>
+                    `;
+                    
+                    const weeklyWithdrawalCell = `
+                        <div style="text-align: center;">
+                            <label style="display: block; margin-bottom: 5px;">
+                                <input type="checkbox" ${week.weeklyWithdrawalMade ? 'checked' : ''} 
+                                    onchange="updateWeeklyWithdrawal(${weekIndex}, this.checked)" style="margin-right: 5px;">
+                                $200 Withdrawn
+                            </label>
+                            <span class="withdrawal-status ${week.weeklyWithdrawalMade ? 'withdrawn' : 'not-withdrawn'}">
+                                ${week.weeklyWithdrawalMade ? 'Withdrawn' : 'Not Withdrawn'}
+                            </span>
+                        </div>
+                    `;
+                    
+                    // Render each purchase as a separate row
+                    week.purchases.forEach((purchase, purchaseIndex) => {
+                        const row = document.createElement('tr');
+                        
+                        // Apply balance classes for this purchase
+                        let purchasePerson1BalanceClass = purchase.person1BalanceAfter > 0 ? 'positive-balance' : 'negative-balance';
+                        let purchasePerson2BalanceClass = purchase.person2BalanceAfter > 0 ? 'positive-balance' : 'negative-balance';
+                        
+                        // Determine purchaser balance for the 'Purchaser Balance' column
+                        let purchaserBalance = '';
+                        let purchaserBalanceClass = '';
+                        if (purchase.purchasedBy === 'person1') {
+                            purchaserBalance = formatCurrency(purchase.person1BalanceAfter);
+                            purchaserBalanceClass = purchasePerson1BalanceClass;
+                        } else if (purchase.purchasedBy === 'person2') {
+                            purchaserBalance = formatCurrency(purchase.person2BalanceAfter);
+                            purchaserBalanceClass = purchasePerson2BalanceClass;
+                        } else if (purchase.purchasedBy === 'shared') {
+                            purchaserBalance = `${formatCurrency(purchase.person1BalanceAfter)} / ${formatCurrency(purchase.person2BalanceAfter)}`;
+                            purchaserBalanceClass = purchase.person1BalanceAfter > 0 && purchase.person2BalanceAfter > 0 ? 'positive-balance' : 'negative-balance';
+                        } else {
+                            purchaserBalance = '-';
+                            purchaserBalanceClass = '';
+                        }
+                        
+                        // Conditional balance display for additional purchases
+                        let person1BalanceDisplay = purchase.purchasedBy === 'person1' || purchase.purchasedBy === 'shared' ? 
+                            formatCurrency(purchase.person1BalanceAfter) : '-';
+                        let person2BalanceDisplay = purchase.purchasedBy === 'person2' || purchase.purchasedBy === 'shared' ? 
+                            formatCurrency(purchase.person2BalanceAfter) : '-';
+                        let person1BalanceClassDisplay = purchase.purchasedBy === 'person1' || purchase.purchasedBy === 'shared' ? 
+                            purchasePerson1BalanceClass : '';
+                        let person2BalanceClassDisplay = purchase.purchasedBy === 'person2' || purchase.purchasedBy === 'shared' ? 
+                            purchasePerson2BalanceClass : '';
+                        
+                        if (purchaseIndex === 0) {
+                            // First purchase row includes week header info
+                            row.className = 'week-header';
+                            row.id = `week-${weekIndex}`; // Add ID for scrolling
+                            
+                            // Create purchaser dropdown
+                            const purchaserOptions = `
+                                <select class="input-field" onchange="updatePurchaseBy(${weekIndex}, ${purchaseIndex}, this.value)">
+                                    <option value="" ${purchase.purchasedBy === '' ? 'selected' : ''}>-</option>
+                                    <option value="person1" ${purchase.purchasedBy === 'person1' ? 'selected' : ''}>${person1Label}</option>
+                                    <option value="person2" ${purchase.purchasedBy === 'person2' ? 'selected' : ''}>${person2Label}</option>
+                                    <option value="shared" ${purchase.purchasedBy === 'shared' ? 'selected' : ''}>Shared</option>
+                                </select>
+                            `;
+                            
+                            const actionsCell = `
+                                <div>
+                                    <button class="add-purchase-btn" onclick="addPurchase(${weekIndex})">+ Purchase</button>
+                                    ${purchaseIndex > 0 || purchase.description || purchase.cost > 0 ? 
+                                        `<button class="remove-btn" onclick="removePurchase(${weekIndex}, ${purchaseIndex})">Remove</button>` : ''}
+                                </div>
+                            `;
+                            
+                            row.innerHTML = `
+                                <td style="min-width: 90px;">${formatDate(week.date)}</td>
+                                <td class="currency">${formatCurrency(week.person1OpeningBalance + week.person2OpeningBalance)}</td>
+                                <td class="currency">$200.00</td>
+                                <td style="min-width: 140px;">${weeklyWithdrawalCell}</td>
+                                <td style="min-width: 160px;">${individualWithdrawalsCell}</td>
+                                <td style="min-width: 150px;"><input type="text" class="input-field" value="${purchase.description}" 
+                                    onchange="updatePurchaseDescription(${weekIndex}, ${purchaseIndex}, this.value)"></td>
+                                <td style="min-width: 100px;">${purchaserOptions}</td>
+                                <td style="min-width: 80px;"><input type="number" class="input-field currency small" value="${purchase.cost}" 
+                                    onchange="updatePurchaseCost(${weekIndex}, ${purchaseIndex}, parseFloat(this.value) || 0)" step="0.01" min="0"></td>
+                                <td class="currency ${purchasePerson1BalanceClass}">${formatCurrency(purchase.person1BalanceAfter)}</td>
+                                <td class="currency ${purchasePerson2BalanceClass}">${formatCurrency(purchase.person2BalanceAfter)}</td>
+                                <td class="currency ${purchaserBalanceClass}">${purchaserBalance}</td>
+                                <td>${actionsCell}</td>
+                            `;
+                        } else {
+                            // Additional purchase rows for the same week
+                            row.className = 'purchase-row';
+                            
+                            const purchaserOptions = `
+                                <select class="input-field" onchange="updatePurchaseBy(${weekIndex}, ${purchaseIndex}, this.value)">
+                                    <option value="" ${purchase.purchasedBy === '' ? 'selected' : ''}>-</option>
+                                    <option value="person1" ${purchase.purchasedBy === 'person1' ? 'selected' : ''}>${person1Label}</option>
+                                    <option value="person2" ${purchase.purchasedBy === 'person2' ? 'selected' : ''}>${person2Label}</option>
+                                    <option value="shared" ${purchase.purchasedBy === 'shared' ? 'selected' : ''}>Shared</option>
+                                </select>
+                            `;
+                            
+                            row.innerHTML = `
+                                <td colspan="5" style="text-align: center; color: #666; font-style: italic;">Additional Purchase</td>
+                                <td style="min-width: 150px;"><input type="text" class="input-field" value="${purchase.description}" 
+                                    onchange="updatePurchaseDescription(${weekIndex}, ${purchaseIndex}, this.value)"></td>
+                                <td style="min-width: 100px;">${purchaserOptions}</td>
+                                <td style="min-width: 80px;"><input type="number" class="input-field currency small" value="${purchase.cost}" 
+                                    onchange="updatePurchaseCost(${weekIndex}, ${purchaseIndex}, parseFloat(this.value) || 0)" step="0.01" min="0"></td>
+                                <td class="currency ${person1BalanceClassDisplay}">${person1BalanceDisplay}</td>
+                                <td class="currency ${person2BalanceClassDisplay}">${person2BalanceDisplay}</td>
+                                <td class="currency ${purchaserBalanceClass}">${purchaserBalance}</td>
+                                <td><button class="remove-btn" onclick="removePurchase(${weekIndex}, ${purchaseIndex})">Remove</button></td>
+                            `;
+                        }
+                        
+                        tbody.appendChild(row);
+                    });
+                });
+            } catch (e) {
+                console.error('Error in renderTable:', e);
+            }
+        }
+        
+        function addPurchase(weekIndex) {
+            weeks[weekIndex].purchases.push({
+                description: '',
+                purchasedBy: '',
+                cost: 0,
+                person1BalanceAfter: weeks[weekIndex].person1Balance,
+                person2BalanceAfter: weeks[weekIndex].person2Balance
+            });
+            
+            calculateBalances();
+            renderTable();
+            updateSummary();
+            saveData();
+        }
+        
+        function removePurchase(weekIndex, purchaseIndex) {
+            if (weeks[weekIndex].purchases.length > 1) {
+                weeks[weekIndex].purchases.splice(purchaseIndex, 1);
+                calculateBalances();
+                renderTable();
+                updateSummary();
+                saveData();
+            }
+        }
+        
+        function updatePurchaseDescription(weekIndex, purchaseIndex, value) {
+            weeks[weekIndex].purchases[purchaseIndex].description = value;
+            calculateBalances();
+            renderTable();
+            updateSummary();
+            saveData();
+        }
+        
+        function updatePurchaseCost(weekIndex, purchaseIndex, value) {
+            weeks[weekIndex].purchases[purchaseIndex].cost = value;
+            calculateBalances();
+            renderTable();
+            updateSummary();
+            saveData();
+        }
+        
+        function updatePurchaseBy(weekIndex, purchaseIndex, value) {
+            weeks[weekIndex].purchases[purchaseIndex].purchasedBy = value;
+            calculateBalances();
+            renderTable();
+            updateSummary();
+            saveData();
+        }
+        
+        function updateWeeklyWithdrawal(weekIndex, checked) {
+            weeks[weekIndex].weeklyWithdrawalMade = checked;
+            updateSummary();
+            saveData();
+        }
+        
+        function updateIndividualWithdrawal(weekIndex, person, checked) {
+            if (person === 'person1') {
+                weeks[weekIndex].person1Withdrawn = checked;
+            } else {
+                weeks[weekIndex].person2Withdrawn = checked;
+            }
+            updateSummary();
+            saveData();
+        }
+        
+        function updatePersonNames() {
+            const person1NameInput = document.getElementById('person1Name');
+            const person2NameInput = document.getElementById('person2Name');
+            const person1CardName = document.getElementById('person1CardName');
+            const person2CardName = document.getElementById('person2CardName');
+            
+            if (!person1NameInput || !person2NameInput || !person1CardName || !person2CardName) {
+                console.error('One or more DOM elements not found in updatePersonNames:', {
+                    person1NameInput: !!person1NameInput,
+                    person2NameInput: !!person2NameInput,
+                    person1CardName: !!person1CardName,
+                    person2CardName: !!person2CardName
+                });
+                return;
+            }
+            
+            personNames.person1 = person1NameInput.value.trim();
+            personNames.person2 = person2NameInput.value.trim();
+            
+            person1CardName.textContent = personNames.person1 || 'Person 1';
+            person2CardName.textContent = personNames.person2 || 'Person 2';
+            
+            renderTable();
+            updateSummary();
+            saveData();
+        }
+        
+        function updateSummary() {
+            if (weeks.length === 0) {
+                console.warn('No weeks data available for summary');
+                return;
+            }
+            
+            const latestWeek = weeks[weeks.length - 1];
+            let totalSpent = 0;
+            let totalAllowance = 0;
+            
+            weeks.forEach(week => {
+                week.purchases.forEach(purchase => {
+                    totalSpent += purchase.cost;
+                });
+                totalAllowance += week.weeklyAllowance;
+            });
+            
+            const elements = {
+                currentBalance: document.getElementById('currentBalance'),
+                totalSpent: document.getElementById('totalSpent'),
+                totalAllowance: document.getElementById('totalAllowance'),
+                weeklyWithdrawalStatus: document.getElementById('weeklyWithdrawalStatus'),
+                person1Balance: document.getElementById('person1Balance'),
+                person1Spent: document.getElementById('person1Spent'),
+                person1Withdrawal: document.getElementById('person1Withdrawal'),
+                person2Balance: document.getElementById('person2Balance'),
+                person2Spent: document.getElementById('person2Spent'),
+                person2Withdrawal: document.getElementById('person2Withdrawal')
+            };
+            
+            if (Object.values(elements).some(el => !el)) {
+                console.error('One or more DOM elements not found in updateSummary:', {
+                    currentBalance: !!elements.currentBalance,
+                    totalSpent: !!elements.totalSpent,
+                    totalAllowance: !!elements.totalAllowance,
+                    weeklyWithdrawalStatus: !!elements.weeklyWithdrawalStatus,
+                    person1Balance: !!elements.person1Balance,
+                    person1Spent: !!elements.person1Spent,
+                    person1Withdrawal: !!elements.person1Withdrawal,
+                    person2Balance: !!elements.person2Balance,
+                    person2Spent: !!elements.person2Spent,
+                    person2Withdrawal: !!elements.person2Withdrawal
+                });
+                return;
+            }
+            
+            elements.currentBalance.textContent = formatCurrency(latestWeek.person1Balance + latestWeek.person2Balance);
+            elements.totalSpent.textContent = formatCurrency(totalSpent);
+            elements.totalAllowance.textContent = formatCurrency(totalAllowance);
+            elements.weeklyWithdrawalStatus.textContent = latestWeek.weeklyWithdrawalMade ? 'Withdrawn' : 'Not Withdrawn';
+            elements.weeklyWithdrawalStatus.className = `summary-value ${latestWeek.weeklyWithdrawalMade ? 'withdrawn' : 'not-withdrawn'}`;
+            
+            elements.person1Balance.textContent = formatCurrency(latestWeek.person1Balance);
+            elements.person1Spent.textContent = formatCurrency(
+                weeks.reduce((sum, week) => sum + week.purchases.reduce((s, p) => 
+                    p.purchasedBy === 'person1' ? s + p.cost : p.purchasedBy === 'shared' ? s + p.cost / 2 : s, 0), 0)
+            );
+            elements.person1Withdrawal.textContent = latestWeek.person1Withdrawn ? 'Withdrawn' : 'Not Withdrawn';
+            elements.person1Withdrawal.className = `person-stat-value ${latestWeek.person1Withdrawn ? 'withdrawn' : 'not-withdrawn'}`;
+            
+            elements.person2Balance.textContent = formatCurrency(latestWeek.person2Balance);
+            elements.person2Spent.textContent = formatCurrency(
+                weeks.reduce((sum, week) => sum + week.purchases.reduce((s, p) => 
+                    p.purchasedBy === 'person2' ? s + p.cost : p.purchasedBy === 'shared' ? s + p.cost / 2 : s, 0), 0)
+            );
+            elements.person2Withdrawal.textContent = latestWeek.person2Withdrawn ? 'Withdrawn' : 'Not Withdrawn';
+            elements.person2Withdrawal.className = `person-stat-value ${latestWeek.person2Withdrawn ? 'withdrawn' : 'not-withdrawn'}`;
+        }
+        
+        // Data persistence for sharing
+        function saveData() {
+            const data = {
+                weeks: weeks.map(week => ({
+                    ...week,
+                    date: week.date.toISOString() // Convert date to string for serialization
+                })),
+                personNames: personNames,
+                lastUpdated: new Date().toISOString()
+            };
+            
+            // Create shareable URL with data
+            const encodedData = btoa(JSON.stringify(data));
+            const currentUrl = window.location.href.includes('about:srcdoc') 
+                ? 'file://shared-allowance-tracker.html' // Fallback base URL for local file
+                : window.location.href.split('?')[0];
+            const shareableUrl = `${currentUrl}?data=${encodedData}`;
+            
+            // Update the shareable URL field
+            const shareableUrlInput = document.getElementById('shareableUrl');
+            if (shareableUrlInput) {
+                shareableUrlInput.value = shareableUrl;
+            } else {
+                console.error('Shareable URL input not found');
+            }
+            
+            // Attempt to update browser history, but skip in restricted environments
+            if (!window.location.href.includes('about:srcdoc') && history.replaceState) {
+                try {
+                    history.replaceState(null, null, shareableUrl);
+                } catch (e) {
+                    console.warn('Failed to update history state:', e);
+                    // Fallback: rely on shareable URL input
+                }
+            } else {
+                console.log('Running in restricted environment (e.g., about:srcdoc); history state not updated. Use the Shareable URL field.');
+            }
+        }
+        
+        function loadData() {
+            // Try to load from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataParam = urlParams.get('data');
+            
+            if (dataParam) {
+                try {
+                    const decodedData = JSON.parse(atob(dataParam));
+                    if (decodedData.weeks && Array.isArray(decodedData.weeks)) {
+                        // Convert ISO date strings back to Date objects and validate structure
+                        weeks = decodedData.weeks.map(week => ({
+                            date: new Date(week.date),
+                            person1OpeningBalance: week.person1OpeningBalance || 0,
+                            person2OpeningBalance: week.person2OpeningBalance || 0,
+                            weeklyAllowance: week.weeklyAllowance || 200,
+                            weeklyWithdrawalMade: !!week.weeklyWithdrawalMade,
+                            person1Withdrawn: !!week.person1Withdrawn,
+                            person2Withdrawn: !!week.person2Withdrawn,
+                            purchases: Array.isArray(week.purchases) ? week.purchases.map(p => ({
+                                description: p.description || '',
+                                purchasedBy: p.purchasedBy || '',
+                                cost: parseFloat(p.cost) || 0,
+                                person1BalanceAfter: p.person1BalanceAfter || 0,
+                                person2BalanceAfter: p.person2BalanceAfter || 0
+                            })) : [{ description: '', purchasedBy: '', cost: 0, person1BalanceAfter: 0, person2BalanceAfter: 0 }],
+                            person1Balance: week.person1Balance || 0,
+                            person2Balance: week.person2Balance || 0,
+                            status: week.status || ''
+                        }));
+                        personNames = decodedData.personNames || { person1: '', person2: '' };
+                        
+                        // Update name inputs
+                        const person1NameInput = document.getElementById('person1Name');
+                        const person2NameInput = document.getElementById('person2Name');
+                        if (person1NameInput) person1NameInput.value = personNames.person1;
+                        if (person2NameInput) person2NameInput.value = personNames.person2;
+                        
+                        // Update individual balance cards
+                        const person1CardName = document.getElementById('person1CardName');
+                        const person2CardName = document.getElementById('person2CardName');
+                        if (person1CardName) person1CardName.textContent = personNames.person1 || 'Person 1';
+                        if (person2CardName) person2CardName.textContent = personNames.person2 || 'Person 2';
+                        
+                        calculateBalances();
+                        renderTable();
+                        updateSummary();
+                    } else {
+                        console.warn('Invalid weeks data in URL, initializing with default');
+                        initializeTracker();
+                    }
+                } catch (e) {
+                    console.error('Error loading data from URL:', e);
+                    initializeTracker(); // Fallback to default if parsing fails
+                }
+            } else {
+                initializeTracker(); // No data in URL, initialize with default
+            }
+        }
+        
+        function addWeek() {
+            console.log('addWeek called');
+            const lastWeek = weeks[weeks.length - 1];
+            const newWeekDate = new Date(lastWeek.date);
+            newWeekDate.setDate(newWeekDate.getDate() + 7);
+            
+            weeks.push({
+                date: newWeekDate,
+                person1OpeningBalance: lastWeek.person1Balance,
+                person2OpeningBalance: lastWeek.person2Balance,
+                weeklyAllowance: 200,
+                weeklyWithdrawalMade: false,
+                person1Withdrawn: false,
+                person2Withdrawn: false,
+                purchases: [{
+                    description: '',
+                    purchasedBy: '',
+                    cost: 0,
+                    person1BalanceAfter: lastWeek.person1Balance + 100,
+                    person2BalanceAfter: lastWeek.person2Balance + 100
+                }],
+                person1Balance: lastWeek.person1Balance + 100,
+                person2Balance: lastWeek.person2Balance + 100,
+                status: ''
+            });
+            
+            console.log('New week added:', weeks[weeks.length - 1]);
+            calculateBalances();
+            renderTable();
+            updateSummary();
+            saveData();
+            
+            // Scroll to the new week
+            const newWeekRow = document.getElementById(`week-${weeks.length - 1}`);
+            if (newWeekRow) {
+                newWeekRow.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        // Initialize the tracker after DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
