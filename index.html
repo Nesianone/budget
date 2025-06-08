@@ -327,7 +327,7 @@
             <h3>📋 How to Use:</h3>
             <p><strong>Setup:</strong> Enter both person's names above</p>
             <p><strong>Multiple Purchases:</strong> Add multiple purchase rows per week using the "+" button</p>
-            <p><strong>Individual Tracking:</strong> Each purchase is tracked per person - select who made each purchase</p>
+            <p><strong>Individual Tracking:</strong> Each purchase is tracked per person - select who made each purchase (Person 1 or Person 2)</p>
             <p><strong>Weekly Withdrawal:</strong> Check the $200 withdrawal box when you physically withdraw the money</p>
             <p><strong>Individual Withdrawals:</strong> Track if each person has withdrawn their individual $100</p>
             <p><strong>Visual Cues:</strong> Green = Funds Available | Red = Deficit | Individual balances shown below</p>
@@ -497,10 +497,6 @@
                             runningPerson1Balance -= purchase.cost;
                         } else if (purchase.purchasedBy === 'person2') {
                             runningPerson2Balance -= purchase.cost;
-                        } else if (purchase.purchasedBy === 'shared' && purchase.cost > 0) {
-                            const splitCost = purchase.cost / 2;
-                            runningPerson1Balance -= splitCost;
-                            runningPerson2Balance -= splitCost;
                         }
                         purchase.person1BalanceAfter = runningPerson1Balance;
                         purchase.person2BalanceAfter = runningPerson2Balance;
@@ -604,22 +600,19 @@
                         } else if (purchase.purchasedBy === 'person2') {
                             purchaserBalance = formatCurrency(purchase.person2BalanceAfter);
                             purchaserBalanceClass = purchasePerson2BalanceClass;
-                        } else if (purchase.purchasedBy === 'shared') {
-                            purchaserBalance = `${formatCurrency(purchase.person1BalanceAfter)} / ${formatCurrency(purchase.person2BalanceAfter)}`;
-                            purchaserBalanceClass = purchase.person1BalanceAfter > 0 && purchase.person2BalanceAfter > 0 ? 'positive-balance' : 'negative-balance';
                         } else {
                             purchaserBalance = '-';
                             purchaserBalanceClass = '';
                         }
                         
                         // Conditional balance display for additional purchases
-                        let person1BalanceDisplay = purchase.purchasedBy === 'person1' || purchase.purchasedBy === 'shared' ? 
+                        let person1BalanceDisplay = purchase.purchasedBy === 'person1' ? 
                             formatCurrency(purchase.person1BalanceAfter) : '-';
-                        let person2BalanceDisplay = purchase.purchasedBy === 'person2' || purchase.purchasedBy === 'shared' ? 
+                        let person2BalanceDisplay = purchase.purchasedBy === 'person2' ? 
                             formatCurrency(purchase.person2BalanceAfter) : '-';
-                        let person1BalanceClassDisplay = purchase.purchasedBy === 'person1' || purchase.purchasedBy === 'shared' ? 
+                        let person1BalanceClassDisplay = purchase.purchasedBy === 'person1' ? 
                             purchasePerson1BalanceClass : '';
-                        let person2BalanceClassDisplay = purchase.purchasedBy === 'person2' || purchase.purchasedBy === 'shared' ? 
+                        let person2BalanceClassDisplay = purchase.purchasedBy === 'person2' ? 
                             purchasePerson2BalanceClass : '';
                         
                         if (purchaseIndex === 0) {
@@ -627,13 +620,12 @@
                             row.className = 'week-header';
                             row.id = `week-${weekIndex}`; // Add ID for scrolling
                             
-                            // Create purchaser dropdown
+                            // Create purchaser dropdown (no Shared option)
                             const purchaserOptions = `
                                 <select class="input-field" onchange="updatePurchaseBy(${weekIndex}, ${purchaseIndex}, this.value)">
                                     <option value="" ${purchase.purchasedBy === '' ? 'selected' : ''}>-</option>
                                     <option value="person1" ${purchase.purchasedBy === 'person1' ? 'selected' : ''}>${person1Label}</option>
                                     <option value="person2" ${purchase.purchasedBy === 'person2' ? 'selected' : ''}>${person2Label}</option>
-                                    <option value="shared" ${purchase.purchasedBy === 'shared' ? 'selected' : ''}>Shared</option>
                                 </select>
                             `;
                             
@@ -656,8 +648,8 @@
                                 <td style="min-width: 100px;">${purchaserOptions}</td>
                                 <td style="min-width: 80px;"><input type="number" class="input-field currency small" value="${purchase.cost}" 
                                     onchange="updatePurchaseCost(${weekIndex}, ${purchaseIndex}, parseFloat(this.value) || 0)" step="0.01" min="0"></td>
-                                <td class="currency ${purchasePerson1BalanceClass}">${formatCurrency(purchase.person1BalanceAfter)}</td>
-                                <td class="currency ${purchasePerson2BalanceClass}">${formatCurrency(purchase.person2BalanceAfter)}</td>
+                                <td class="currency ${person1BalanceClassDisplay}">${person1BalanceDisplay}</td>
+                                <td class="currency ${person2BalanceClassDisplay}">${person2BalanceDisplay}</td>
                                 <td class="currency ${purchaserBalanceClass}">${purchaserBalance}</td>
                                 <td>${actionsCell}</td>
                             `;
@@ -670,7 +662,6 @@
                                     <option value="" ${purchase.purchasedBy === '' ? 'selected' : ''}>-</option>
                                     <option value="person1" ${purchase.purchasedBy === 'person1' ? 'selected' : ''}>${person1Label}</option>
                                     <option value="person2" ${purchase.purchasedBy === 'person2' ? 'selected' : ''}>${person2Label}</option>
-                                    <option value="shared" ${purchase.purchasedBy === 'shared' ? 'selected' : ''}>Shared</option>
                                 </select>
                             `;
                             
@@ -843,7 +834,7 @@
             elements.person1Balance.textContent = formatCurrency(latestWeek.person1Balance);
             elements.person1Spent.textContent = formatCurrency(
                 weeks.reduce((sum, week) => sum + week.purchases.reduce((s, p) => 
-                    p.purchasedBy === 'person1' ? s + p.cost : p.purchasedBy === 'shared' ? s + p.cost / 2 : s, 0), 0)
+                    p.purchasedBy === 'person1' ? s + p.cost : s, 0), 0)
             );
             elements.person1Withdrawal.textContent = latestWeek.person1Withdrawn ? 'Withdrawn' : 'Not Withdrawn';
             elements.person1Withdrawal.className = `person-stat-value ${latestWeek.person1Withdrawn ? 'withdrawn' : 'not-withdrawn'}`;
@@ -851,7 +842,7 @@
             elements.person2Balance.textContent = formatCurrency(latestWeek.person2Balance);
             elements.person2Spent.textContent = formatCurrency(
                 weeks.reduce((sum, week) => sum + week.purchases.reduce((s, p) => 
-                    p.purchasedBy === 'person2' ? s + p.cost : p.purchasedBy === 'shared' ? s + p.cost / 2 : s, 0), 0)
+                    p.purchasedBy === 'person2' ? s + p.cost : s, 0), 0)
             );
             elements.person2Withdrawal.textContent = latestWeek.person2Withdrawn ? 'Withdrawn' : 'Not Withdrawn';
             elements.person2Withdrawal.className = `person-stat-value ${latestWeek.person2Withdrawn ? 'withdrawn' : 'not-withdrawn'}`;
@@ -916,7 +907,7 @@
                             person2Withdrawn: !!week.person2Withdrawn,
                             purchases: Array.isArray(week.purchases) ? week.purchases.map(p => ({
                                 description: p.description || '',
-                                purchasedBy: p.purchasedBy || '',
+                                purchasedBy: p.purchasedBy === 'shared' ? '' : p.purchasedBy || '', // Convert legacy 'shared' to ''
                                 cost: parseFloat(p.cost) || 0,
                                 person1BalanceAfter: p.person1BalanceAfter || 0,
                                 person2BalanceAfter: p.person2BalanceAfter || 0
